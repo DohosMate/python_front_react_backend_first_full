@@ -1,17 +1,18 @@
 import './App.css';
-import { useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import ArticleList from './components/ArticleList';
+import Form from './components/Form';
 
 function App() {
 
   const [articles, setArticles] = useState([])
-  const [editedArticle, setEditedArticle] = useState([])
+  const [editedArticle, setEditedArticle] = useState(null)
 
   useEffect(() => {
     fetch('http://127.0.0.1:5000/get', {
       'method': 'GET',
       headers: {
-        'Content-Type': 'applications/json'
+        'Content-Type': 'application/json'
       }
     })
       .then(resp => resp.json())
@@ -20,15 +21,69 @@ function App() {
 
   }, [])
 
-  const editArticle = ()=>{
+  const editArticle = (article) => {
+    setEditedArticle(article)
+  }
 
+  const updatedData = (article) => {
+    const new_article = articles.map(my_article => {
+      if (my_article.id === article.id) {
+        return article
+      } else {
+        return my_article
+      }
+    })
+    setArticles(new_article)
+  }
+
+  const openForm = () => {
+    setEditedArticle({ title: '', body: '' })
+  }
+
+  const insertedArtice = (article) => {
+    const new_articles = [...articles, article]
+    setArticles(new_articles)
+  }
+
+  const deleteArticle = (article) => {
+    const new_articles = articles.filter(myarticle => {
+      if (myarticle.id === article.id) {
+        return false;
+      }
+      return true;
+    })
+
+    setArticles(new_articles)
   }
 
   return (
     <div className="App">
-      <h1>Flask and React JS Course</h1>
+      <div className="row">
+        <div className="col">
+          <h1>Flask and React JS Course</h1>
 
-    <ArticleList articles = {articles}/>
+
+        </div>
+        <div className="col">
+          <button
+            className='btn btn-success'
+            onClick={openForm}
+          >InsertArticle</button>
+
+
+        </div>
+      </div>
+
+      <ArticleList
+        articles={articles}
+        editArticle={editArticle}
+        deleteArticle={deleteArticle}
+      />
+      {editedArticle ? (<Form
+        article={editedArticle}
+        updatedData={updatedData}
+        insertedArtice={insertedArtice}
+      />) : null}
     </div>
   );
 }
